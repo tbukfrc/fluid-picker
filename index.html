@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gender Fluid Picker</title>
+</head>
+<body>
+    <script src="app.js"></script>
+    <script src="matter.min.js"></script>
+    <label for="slider">Male:</label>
+    <input type="range" min="0" max="1000" value="0" id="maleSlider">
+    <div id="fluid-container"></div>
+    <style>
+        canvas {
+            display: none;
+            position: absolute;
+            top: 30px;
+            left: 0;
+        }
+        #fluid-container {
+            /*blur objects in container*/
+            filter: blur(5px);
+            height: 600px;
+            width: 800px;
+        }
+    </style>
+</body>
+</html>
