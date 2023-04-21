@@ -4,26 +4,79 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gender Fluid Picker</title>
+    <title>Fluid Picker</title>
 </head>
 <body>
-    <script src="app.js"></script>
+    <script src="app.js?v=1.9.3"></script>
     <script src="matter.min.js"></script>
-    <label for="slider">Male:</label>
-    <input type="range" min="0" max="1000" value="0" id="maleSlider">
-    <div id="fluid-container"></div>
+    <label for="maleSlider">blue:</label>
+    <input type="range" min="0" max="500" value="0" id="maleSlider">
+    <label for="femaleSlider">pink:</label>
+    <input type="range" min="0" max="500" value="0" id="femaleSlider">
+    <label for="custom">custom:</label>
+    <input type="range" min="0" max="500" value="0" id="otherSlider">
+    <button id="shakeButton">Shake Fluid</button>
+    <div id=border>
+        <div id="fluid-container"></div>
+    </div>
+    <div id=hueDisplay><p id=hue>1</p></div>
+    <label id=hueLabel for="customHue">custom color:</label>
+    <input type="range" min="1" max="360" value="0" id="customHue">
+    <details>
+        <summary>Advanced</summary>
+        <label for=particleSize>particle size:</label>
+        <input type="number" min="1" max="40" value="5" id="particleSize">
+        <label for=smoothingLevel>smoothing amount:</label>
+        <input type="number" min="0" max="15" value="6" id="smoothingLevel">
+    </details>
     <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+        }
         canvas {
-            display: none;
-            position: absolute;
-            top: 30px;
-            left: 0;
+            display: inline-block;
+        }
+        #hueLabel {
+            margin-left: 10px;
+        }
+        #hueDisplay {
+            background-color: hsl(1, 100%, 84%);
+            height: 64px;
+            width: 64px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
         #fluid-container {
-            /*blur objects in container*/
-            filter: blur(5px);
+            position: relative;
+            filter: blur(6px);
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+        }
+        #border {
+            border-style: solid;
+            border-color: black;
+            padding: 0px;
             height: 600px;
             width: 800px;
+        }
+        @keyframes shaking {
+            from {
+                margin-top: 0px;
+            }
+            50% {
+                margin-top: 50px;
+            }
+            to {
+                margin-top: 0px;
+            }
+        }
+        .shake {
+            animation-name: shaking;
+            animation-duration: 0.2s;
         }
     </style>
 </body>
