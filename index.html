@@ -7,7 +7,7 @@
     <title>Fluid Picker</title>
 </head>
 <body>
-    <script src="app.js?v=1.9.3"></script>
+    <script src="app.js?v=1.9.5"></script>
     <script src="matter.min.js"></script>
     <label for="maleSlider">blue:</label>
     <input type="range" min="0" max="500" value="0" id="maleSlider">
@@ -16,6 +16,7 @@
     <label for="custom">custom:</label>
     <input type="range" min="0" max="500" value="0" id="otherSlider">
     <button id="shakeButton">Shake Fluid</button>
+    <button id="corruption">e̶̦͈͚̬͙̊v̵̧̋e̶̩̖͚͇̲̔̈̚r̵̜͂́̕ỷ̷̡̲̩̬̓̋͘͜t̵̟̩̙̝͕̍̿h̷̡̡̖͕͆̒̀͑̽i̷̜̟̜̚͜n̶̖̰̎́̔̅͗ǵ̵̡̼̝͕</button>
     <div id=border>
         <div id="fluid-container"></div>
     </div>
@@ -28,7 +29,10 @@
         <input type="number" min="1" max="40" value="5" id="particleSize">
         <label for=smoothingLevel>smoothing amount:</label>
         <input type="number" min="0" max="15" value="6" id="smoothingLevel">
+        <label for="debug">debug mode</label>
+        <input type="checkbox" id="debug" name="debug" value="debug">
     </details>
+    <p id="totalAdjustedForce"></p>
     <style>
         html, body {
             width: 100%;
@@ -36,7 +40,7 @@
             overflow-x: hidden;
         }
         canvas {
-            display: inline-block;
+            display: none;
         }
         #hueLabel {
             margin-left: 10px;
@@ -55,6 +59,7 @@
             height: 100%;
             width: 100%;
             margin: 0px;
+            overflow: hidden;
         }
         #border {
             border-style: solid;

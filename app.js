@@ -16,8 +16,8 @@ window.onload = () => {
 
     // create engine
     const engine = Engine.create({
-        positionIterations: 20,
-        velocityIterations: 20,
+        positionIterations: 30,
+        velocityIterations: 30,
     });
 
     // create renderer
@@ -33,7 +33,7 @@ window.onload = () => {
 
     // create runner
     const runner = Runner.create({
-        isFixed: true
+        isFixed: false
     });
 
     // create set number of circles
@@ -41,6 +41,7 @@ window.onload = () => {
     const femaleCircles = []
     const otherCircles = []
     const allCircles = [];
+    const waterBody = [];
     function addCircle(colorType, circleArray, customColor) {
         if (colorType == 0) {
             //187
@@ -54,6 +55,10 @@ window.onload = () => {
             spawnX = 700;
         } else if (colorType == 2) {
             currentVal = customColor;
+            color = `hsl(${currentVal}, 100%, 82%)`
+            spawnX = 400;
+        } else if (colorType == 3) {
+            currentVal = '280';
             color = `hsl(${currentVal}, 100%, 82%)`
             spawnX = 400;
         }
@@ -80,6 +85,7 @@ window.onload = () => {
         waterParticle.domElement.style.backgroundColor = color;
         waterParticle.domElement.className = 'water-particle';
         waterParticle.currentColor = currentVal;
+        waterParticle.touchedWater = false;
 
         // add each circle to the DOM
         document.getElementById('fluid-container').appendChild(waterParticle.domElement);
@@ -115,6 +121,7 @@ window.onload = () => {
             addCircle(0, maleCircles);
             maleSlider.value = maleSlider.value - 1;
             if (document.getElementById('maleSlider').value < 2) {
+                console.log(waterBody)
                 clearInterval(interval);
             }
         }, 1)
@@ -180,11 +187,6 @@ window.onload = () => {
     mouseCollider.domElement.style.width = '60px';
     mouseCollider.domElement.style.height = '60px';
     //document.getElementById('border').appendChild(mouseCollider.domElement)
-    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
-        null
-    } else {
-        //Composite.add(engine.world, mouseCollider);
-    }
 
     Composite.add(engine.world, [borderLeft, borderRight, ground, ceiling]);
 
@@ -214,7 +216,45 @@ window.onload = () => {
                 pair.bodyA.currentColor = (bodyAcolor+bodyBcolor)/2
                 pair.bodyB.currentColor = (bodyAcolor+bodyBcolor)/2
             }
+            e.pairs.forEach((pair) => {
+                if (!pair.bodyA.touchedWater && pair.bodyB.touchedWater) {
+                    pair.bodyA.touchedWater = true;
+                } else if (!pair.bodyB.touchedWater && pair.bodyA.touchedWater) {
+                    pair.bodyB.touchedWater = true;
+                }
+            })
         })
+    })
+
+    Events.on(engine, 'collisionStart', (e) => {
+        e.pairs.forEach((pair) => {
+            if (!pair.bodyA.touchedWater && pair.bodyB.touchedWater) {
+                pair.bodyA.touchedWater = true;
+            } else if (!pair.bodyB.touchedWater && pair.bodyA.touchedWater) {
+                pair.bodyB.touchedWater = true;
+            }
+        })
+    })
+
+    Events.on(engine, 'collisionEnd' , (e) => {
+        e.pairs.forEach((pair) => {
+            pair.bodyA.touchedWater = false;
+            pair.bodyB.touchedWater = false;
+        })
+    })
+
+    // add event listener for debug checkbox
+    document.getElementById('debug').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            document.getElementsByTagName('canvas')[0].style.display = 'inline-block';
+        } else {
+            document.getElementsByTagName('canvas')[0].style.display = 'none';
+        }
+    })
+
+    // add event listener for corruption button
+    document.getElementById('corruption').addEventListener('click', () => {
+        addCircle(3, otherCircles, userColor);
     })
 
     document.getElementById('shakeButton').addEventListener('click', () => {
@@ -253,21 +293,50 @@ window.onload = () => {
             circle.domElement.style.top = circle.position.y + 'px';
             let skip = false;
         })
-        let highestSurface = 600;
-        let lowestSurface = 0;
-        allCircles.forEach((circle) => {
-            let skip = false;
-            allCircles.forEach((otherCircle) => {
-                if (skip) return
-                if (otherCircle.position.x > circle.position.x - 5 && otherCircle.position.x < circle.position.x + 5 && otherCircle != circle) {
-                    if (otherCircle.position.y > circle.position.y) {
-                        circle.render.fillStyle = 'red';
-                    } else {
-                        circle.render.fillStyle = 'blue';
-                        skip = true;
-                    }
+        allCircles.forEach((circle, i) => {
+            if (circle.position.y > 550) {
+                circle.touchedWater = true;
+            }
+            if (circle.touchedWater && !waterBody.includes(circle)) {
+                waterBody.push(circle);
+            }
+            if (!circle.touchedWater && waterBody.includes(circle)) {
+                waterBody.splice(waterBody.indexOf(circle), 1);
+                circle.render.fillStyle = 'yellow';
+            }
+            //prevent circles from clipping through each other
+            allCircles.forEach((otherCircle, j) => {
+                if (i != j && circle.position.y > otherCircle.position.y - 6 && circle.position.y < otherCircle.position.y + 6 && circle.position.x > otherCircle.position.x - 6 && circle.position.x < otherCircle.position.x + 6) {
+                    Body.applyForce(circle, {x: circle.position.x, y: circle.position.y}, {x: 0, y: -0.00015})
                 }
             })
         })
+        // increase pressure based on the number of circles above the circle
+        waterBody.forEach((circle, i) => {
+            // split the canvas into a given number of vertical sections, and get the number of circles in each section
+            const sections = 10;
+            const sectionWidth = 800/sections;
+            const sectionHeights = [];
+            for (let i = 0; i < sections; i++) {
+                sectionHeights.push(1);
+            }
+            waterBody.forEach((circle) => {
+                const section = Math.floor(circle.position.x/sectionWidth);
+                sectionHeights[section]++;
+            })
+            const section = Math.floor(circle.position.x/sectionWidth);
+            const pressure = sectionHeights[section] * 0.00001;
+
+            // move high pressure circles towards low pressure circles
+            const sectionLeft = section - 1;
+            const sectionRight = section + 1;
+            if (sectionLeft >= 0 && sectionHeights[sectionLeft] < sectionHeights[section] && sectionHeights[sectionLeft] < sectionHeights[sectionRight]) {
+                Body.applyForce(circle, {x: circle.position.x, y: circle.position.y}, {x: -0.00001, y: 0.00001})
+            } else if (sectionRight < sections && sectionHeights[sectionRight] < sectionHeights[section] && sectionHeights[sectionRight] < sectionHeights[sectionLeft]) {
+                Body.applyForce(circle, {x: circle.position.x, y: circle.position.y}, {x: 0.00001, y: 0.00001})
+            }
+
+        })
+
     })
 }
