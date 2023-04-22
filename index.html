@@ -7,22 +7,26 @@
     <title>Fluid Picker</title>
 </head>
 <body>
-    <script src="app.js?v=1.9.5"></script>
+    <script src="app.js?v=2.1.5"></script>
     <script src="matter.min.js"></script>
-    <label for="maleSlider">blue:</label>
+    <label for="maleSlider">Male:</label>
     <input type="range" min="0" max="500" value="0" id="maleSlider">
-    <label for="femaleSlider">pink:</label>
+    <label for="femaleSlider">Female:</label>
     <input type="range" min="0" max="500" value="0" id="femaleSlider">
-    <label for="custom">custom:</label>
+    <label for="custom">Other:</label>
     <input type="range" min="0" max="500" value="0" id="otherSlider">
     <button id="shakeButton">Shake Fluid</button>
-    <button id="corruption">e̶̦͈͚̬͙̊v̵̧̋e̶̩̖͚͇̲̔̈̚r̵̜͂́̕ỷ̷̡̲̩̬̓̋͘͜t̵̟̩̙̝͕̍̿h̷̡̡̖͕͆̒̀͑̽i̷̜̟̜̚͜n̶̖̰̎́̔̅͗ǵ̵̡̼̝͕</button>
+    <button id="corruption">Everything</button>
     <div id=border>
         <div id="fluid-container"></div>
     </div>
     <div id=hueDisplay><p id=hue>1</p></div>
-    <label id=hueLabel for="customHue">custom color:</label>
-    <input type="range" min="1" max="360" value="0" id="customHue">
+    <label id=hueLabel for="customHue">Other Color:</label>
+    <input type="range" min="1" max="360" value="1" id="customHue">
+    <label id=hueLabel for="colorSaturation">Saturation:</label>
+    <input type="range" min="1" max="100" value="100" id="colorSaturation">
+    <label id=hueLabel for="colorLightness">Lightness:</label>
+    <input type="range" min="1" max="100" value="84" id="colorLightness">
     <details>
         <summary>Advanced</summary>
         <label for=particleSize>particle size:</label>

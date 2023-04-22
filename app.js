@@ -12,7 +12,9 @@ window.onload = () => {
     let targetColor = 187;
     const hueDiff = 63.5;
     const hueMiddle = 250.5;
-    let userColor = 0;
+    let userColor = 1;
+    let userSaturation = 100;
+    let userLightness = 84;
 
     // create engine
     const engine = Engine.create({
@@ -42,24 +44,35 @@ window.onload = () => {
     const otherCircles = []
     const allCircles = [];
     const waterBody = [];
-    function addCircle(colorType, circleArray, customColor) {
+    function addCircle(colorType, circleArray, customColor, customSaturation, customLightness) {
+        let currentColorVal;
+        let currentSaturationVal;
+        let currentLightnessVal;
         if (colorType == 0) {
             //187
-            currentVal = 187;
-            color = `hsl(${currentVal}, 100%, 82%)`
-            spawnX = 100
+            currentColorVal = 187;
+            currentSaturationVal = 100;
+            currentLightnessVal = 84;
+            color = `hsl(${currentColorVal}, 100%, 82%)`
+            spawnX = 400;
         } else if (colorType == 1) {
             //314
-            currentVal = 314;
-            color = `hsl(${currentVal}, 100%, 82%)`
-            spawnX = 700;
+            currentColorVal = 314;
+            currentSaturationVal = 100;
+            currentLightnessVal = 84;
+            color = `hsl(${currentColorVal}, 100%, 82%)`
+            spawnX = 400;
         } else if (colorType == 2) {
-            currentVal = customColor;
-            color = `hsl(${currentVal}, 100%, 82%)`
+            currentColorVal = customColor;
+            currentSaturationVal = customSaturation;
+            currentLightnessVal = customLightness;
+            color = `hsl(${currentColorVal}, ${customSaturation}%, ${customLightness}%)`
             spawnX = 400;
         } else if (colorType == 3) {
-            currentVal = '280';
-            color = `hsl(${currentVal}, 100%, 82%)`
+            currentColorVal = '450';
+            currentSaturationVal = 100;
+            currentLightnessVal = 84;
+            color = `hsl(${currentColorVal}, 100%, 82%)`
             spawnX = 400;
         }
 
@@ -84,7 +97,9 @@ window.onload = () => {
         waterParticle.domElement.style.top = waterParticle.position.y + 'px';
         waterParticle.domElement.style.backgroundColor = color;
         waterParticle.domElement.className = 'water-particle';
-        waterParticle.currentColor = currentVal;
+        waterParticle.currentColor = currentColorVal;
+        waterParticle.currentSaturation = currentSaturationVal;
+        waterParticle.currentLightness = currentLightnessVal;
         waterParticle.touchedWater = false;
 
         // add each circle to the DOM
@@ -146,7 +161,7 @@ window.onload = () => {
         const currentCircles = otherCircles.length;
         let otherSlider = document.getElementById('otherSlider');
         let interval = setInterval(() => {
-            addCircle(2, otherCircles, userColor);
+            addCircle(2, otherCircles, userColor, userSaturation, userLightness);
             otherSlider.value = otherSlider.value - 1;
             if (document.getElementById('otherSlider').value < 2) {
                 console.log(otherCircles)
@@ -158,7 +173,17 @@ window.onload = () => {
     document.getElementById('customHue').addEventListener('input', (e) => {
         userColor = parseInt(e.target.value);
         document.getElementById('hue').innerText = userColor;
-        document.getElementById('hueDisplay').style.backgroundColor = `hsl(${userColor}, 100%, 84%)`
+        document.getElementById('hueDisplay').style.backgroundColor = `hsl(${userColor}, ${userSaturation}%, ${userLightness}%)`
+    })
+
+    document.getElementById('colorSaturation').addEventListener('input', (e) => {
+        userSaturation = parseInt(e.target.value);
+        document.getElementById('hueDisplay').style.backgroundColor = `hsl(${userColor}, ${userSaturation}%, ${userLightness}%)`
+    })
+
+    document.getElementById('colorLightness').addEventListener('input', (e) => {
+        userLightness = parseInt(e.target.value);
+        document.getElementById('hueDisplay').style.backgroundColor = `hsl(${userColor}, ${userSaturation}%, ${userLightness}%)`
     })
     
     document.getElementById('smoothingLevel').addEventListener('change', (e) => {
@@ -208,21 +233,31 @@ window.onload = () => {
         e.pairs.forEach((pair) => {
             if (!pair.bodyA.domElement || !pair.bodyB.domElement) {
                 return
-            } else if (pair.bodyA.currentColor != pair.bodyB.currentColor && pair.bodyA.currentColor && pair.bodyB.currentColor) {
+            } else if (pair.bodyA.currentColor != pair.bodyB.currentColor || pair.bodyA.currentSaturation != pair.bodyB.currentSaturation || pair.bodyA.currentLightness != pair.bodyB.currentLightness && pair.bodyA.currentColor && pair.bodyB.currentColor) {
                 const bodyAcolor = pair.bodyA.currentColor
                 const bodyBcolor = pair.bodyB.currentColor
-                pair.bodyA.domElement.style.backgroundColor = `hsl(${(bodyAcolor+bodyBcolor)/2}, 100%, 84%)`
-                pair.bodyB.domElement.style.backgroundColor = `hsl(${(bodyAcolor+bodyBcolor)/2}, 100%, 84%)`
-                pair.bodyA.currentColor = (bodyAcolor+bodyBcolor)/2
-                pair.bodyB.currentColor = (bodyAcolor+bodyBcolor)/2
+                const averageColor = (bodyAcolor+bodyBcolor)/2
+                pair.bodyA.currentColor = averageColor
+                pair.bodyB.currentColor = averageColor
+                const bodyAsaturation = pair.bodyA.currentSaturation
+                const bodyBsaturation = pair.bodyB.currentSaturation
+                const averageSaturation = (bodyAsaturation+bodyBsaturation)/2
+                pair.bodyA.currentSaturation = averageSaturation
+                pair.bodyB.currentSaturation = averageSaturation
+                const bodyAlightness = pair.bodyA.currentLightness
+                const bodyBlightness = pair.bodyB.currentLightness
+                const averageLightness = (bodyAlightness+bodyBlightness)/2
+                pair.bodyA.currentLightness = averageLightness
+                pair.bodyB.currentLightness = averageLightness
+                pair.bodyA.domElement.style.backgroundColor = `hsl(${averageColor}, ${averageSaturation}%, ${averageLightness}%)`
+                pair.bodyB.domElement.style.backgroundColor = `hsl(${averageColor}, ${averageSaturation}%, ${averageLightness}%)`
+
             }
-            e.pairs.forEach((pair) => {
-                if (!pair.bodyA.touchedWater && pair.bodyB.touchedWater) {
-                    pair.bodyA.touchedWater = true;
-                } else if (!pair.bodyB.touchedWater && pair.bodyA.touchedWater) {
-                    pair.bodyB.touchedWater = true;
-                }
-            })
+            if (!pair.bodyA.touchedWater && pair.bodyB.touchedWater) {
+                pair.bodyA.touchedWater = true;
+            } else if (!pair.bodyB.touchedWater && pair.bodyA.touchedWater) {
+                pair.bodyB.touchedWater = true;
+            }
         })
     })
 
@@ -254,7 +289,7 @@ window.onload = () => {
 
     // add event listener for corruption button
     document.getElementById('corruption').addEventListener('click', () => {
-        addCircle(3, otherCircles, userColor);
+        addCircle(3, otherCircles);
     })
 
     document.getElementById('shakeButton').addEventListener('click', () => {
